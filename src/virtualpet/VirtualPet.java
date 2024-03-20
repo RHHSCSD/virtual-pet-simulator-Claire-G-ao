@@ -47,7 +47,7 @@ public class VirtualPet {
             case "Start", "1":
                 //display the list of animals
                 System.out.println("\nrabbit, hamster, dolphin, cat, unicorn, horse, dog");
-                System.out.println("Please choose an animal from the list above: ");
+                System.out.print("Please choose an animal from the list above: ");
                 
                 //read in user's choice of animal
                 listChoice = kb.nextLine();
@@ -59,6 +59,7 @@ public class VirtualPet {
             case "Instructions", "2":
                 break;
             case "Exit", "3":
+                //exit the program
                 System.exit(0);
                 break;
             default:
