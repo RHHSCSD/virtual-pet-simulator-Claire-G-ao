@@ -125,7 +125,7 @@ public class VirtualPet {
         char v,c;
         int numGuessingCorrect, numGuessing, numGuessingPoint;
         String matchingGameString = "AABBCCDDEE";
-        String matchingGameShuffled = "AABBCCDDEE";
+        String matchingGameShuffled = "";
         int money = 50;
         
         //CODE
@@ -176,6 +176,7 @@ public class VirtualPet {
                         displayAnimals();
 
                         //read in user's choice of animal
+                        kb.nextLine();
                         listChoice = kb.nextLine();
 
                         //display a message to confirm user's choice
@@ -245,9 +246,10 @@ public class VirtualPet {
                         numberGuessingGame(money);
 
                         //game 2 - matching game
-                        for (int i=0; i<r.nextInt(5,10); i++){
-                            int a = r.nextInt(4,10);
-                            matchingGameShuffled = matchingGameShuffled.substring(a) + matchingGameShuffled.substring(0, a);
+                        for (int i=0; i<10; i++){
+                            int a = r.nextInt(matchingGameString.length());
+                            matchingGameShuffled += "" + matchingGameString.charAt(a);
+                            matchingGameString = matchingGameString.substring(a+1) + matchingGameString.substring(0, a);
                         }
                         
                         //display the hidden string
