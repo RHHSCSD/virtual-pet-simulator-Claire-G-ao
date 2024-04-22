@@ -4,6 +4,7 @@
  */
 package virtualpet;
 import java.util.*;
+import java.io.*;
 /**
  * @program pet simulator
  * @author Claire Gao
@@ -34,14 +35,13 @@ public class VirtualPet {
         return accessAllowed;
     }
     
-    public static boolean displayMenu(String petName){
+    public static void displayMenu(String petName){
         if (petName.equals("")){
             //display the menu
             System.out.println("Menu:");
             System.out.println("1. Start");
             System.out.println("2. Instructions");
             System.out.println("3. Exit");
-            return true;
         }
         else{
             //display the menu
@@ -49,13 +49,42 @@ public class VirtualPet {
             System.out.println("1. Play/Interact");
             System.out.println("2. Instructions");
             System.out.println("3. Exit");
-            return false;
         }
     }
     
-    public static void checkExit(String menuChoice){
+    public static void checkExit(String menuChoice, String fileName, int[] trackHistory, String userName, String pw, String animalChoice, int[] maxStats, int[] currentStats, int money){
         //exit the program if the third menu option is chosen
         if (menuChoice.equals("3") || menuChoice.equals("Exit")){
+            try{
+                PrintWriter printW = new PrintWriter(fileName);
+                printW.println(userName);
+                printW.println(pw);
+                printW.println(animalChoice);
+                for (int i=0; i<3; i++){
+                    printW.println(maxStats[i]);
+                    printW.println(currentStats[i]);
+                }
+                printW.println(money);
+                printW.close();
+            }catch(FileNotFoundException e){
+                System.out.println("File not found");
+            }
+            
+            //output status regarding user's performance
+            System.out.println("Today you have:");
+            System.out.println("Played with your pet: " + trackHistory[1] + " times");
+            System.out.println("Fed your pet: " + trackHistory[2] + " times");
+            System.out.println("Groomed your pet: " + trackHistory[0] + " times");
+            //assign awards based on user performance
+            if(trackHistory[0] >= 5){
+                System.out.println("Congratulaions! You have earned healthy cleaner!");
+            }
+            if(trackHistory[1] >= 3){
+                System.out.println("Congratulations! You have earned active player!");
+            }
+            if (trackHistory[2] >= 10){
+                System.out.println("Congratulations! You have earned avid eater!");
+            }
             System.exit(0);
         }
     }
@@ -199,7 +228,7 @@ public class VirtualPet {
     //pet interaction
     public static int playWithPet(int energy, String petName){
         energy += 5;
-        System.out.println("You bought a toy for " + petName + "! It's energy is increasing 10 points!!");
+        System.out.println("You bought a toy for " + petName + "! It's energy has increased 5 points!!");
         return energy;
     }
     
@@ -223,58 +252,102 @@ public class VirtualPet {
         
         //CONSTANTS
         final int NAME_LENGTH = r.nextInt(5)+4;
-        final int MAX_HEALTH = r.nextInt(50, 100);
-        final int MAX_FOOD = r.nextInt(50, 100);
-        final int MAX_ENERGY = r.nextInt(50, 100);
+        //health, energy, food
+        final int[] MAX_STATS = {r.nextInt(50, 100),r.nextInt(50, 100),r.nextInt(50, 100)};
         final String VOWELS = "aeiou";
         final String CONSONANTS = "bcdfghjklmnpqrstvwxyz";
         
         //VARIABLES
-        String menuChoice, listChoice;
-        String username, pw, petNameForm; 
-        boolean allowAccess = false;
+        String menuChoice;
+        String animalChoice = "";
+        String username, petNameForm; 
+        String pw = "";
+        String correctPw = "";
+        boolean firstTime = true;
         String petName = "";
         int money = 50;
-        int currentEnergy = 10;
-        int currentHealth = 10;
-        int currentFood = 10;
+        int[] currentStats = {10, 10, 10};
+        int[] trackHistory = {0, 0, 0};
         String petInteraction = "";
         int petInteractionChoice;
+        int tries = 3;
         
         //CODE
         //Part 1
         //display the welcome screen
         displayWelcomeScreen();
         
-        for (int i=0; i<3; i++){
+//        for (int i=0; i<3; i++){
             //read in username and password
-            System.out.print("Enter your username: ");
+            System.out.print("Enter/create your username: ");
             username = kb.nextLine();
-            System.out.print("Enter your password: ");
-            pw = kb.nextLine();
-
-            //determine if access to the program is allowed
-            allowAccess = allowAccess(username, pw);
             
-            //enter the program if access is permitted
-            if (allowAccess){
-                break;
-            }
-            else{
-                //output a message to notify the user
-                System.out.println("You input the wrong username or password.");
-                
-                //exit the program if the user failed to input the right username and password after three times
-                if (i==2){
-                    System.exit(0);
+            String fileName = username + ".txt";
+            File userInfo = new File(fileName);
+//            try{
+//                userInfo.createNewFile();
+//            }catch(IOException e){
+//                System.out.println("Error");
+//            }
+            Scanner s = null;
+            if(userInfo.exists()){
+                try{
+                    s = new Scanner(userInfo);
+                    s.nextLine();
+                    correctPw = s.nextLine();
+                    petName = s.nextLine();
+                    animalChoice = s.nextLine();
+                    //load from the file
+                }catch(FileNotFoundException e){
+                    System.out.println("File not found");
+                }
+                for (int i=0; i<tries; i++){
+                    System.out.print("Enter your password: ");
+                    pw = kb.nextLine();
+                    if (correctPw.equals(pw)){
+                        firstTime = false;
+                        break;
+                    }
+                    else if (i!=2){
+                        System.out.println("Wrong password. Please try again");
+                    }
+                    else{
+                        System.out.println("Login failed.");
+                        System.exit(0);
+                    }
                 }
             }
-        }
+            else{
+                System.out.print("create your password: ");
+                pw = kb.nextLine();
+                petName = "";
+            }
+            
+            
+
+
+            //determine if access to the program is allowed
+//            allowAccess = allowAccess(username, pw);
+            
+//            //enter the program if access is permitted
+//            if (allowAccess){
+//                break;
+//            }
+//            else{
+//                //output a message to notify the user
+//                System.out.println("You input the wrong username or password.");
+//                
+//                //exit the program if the user failed to input the right username and password after three times
+//                if (i==2){
+//                    System.exit(0);
+//                }
+//            }
+//        }
         
         //loop the program infinitely
-        while(allowAccess){
+        while(true){
             //check if the user is new to the program
-            boolean firstTime = displayMenu(petName);
+            displayMenu(petName);
             
             if (firstTime){
                 //read in user's choice of next step
@@ -282,7 +355,7 @@ public class VirtualPet {
                 menuChoice = kb.next();
 
                 //check if the user wants to exit the program
-                checkExit(menuChoice);
+                checkExit(menuChoice, fileName, trackHistory, username, pw, animalChoice, MAX_STATS, currentStats, money);
                 
                 switch(menuChoice){
                     case "Start", "1":
@@ -292,10 +365,10 @@ public class VirtualPet {
 
                         //read in user's choice of animal
                         kb.nextLine();
-                        listChoice = kb.nextLine();
+                        animalChoice = kb.nextLine();
 
                         //display a message to confirm user's choice
-                        System.out.println("You have chosen " + listChoice + " as your animal.");
+                        System.out.println("You have chosen " + animalChoice + " as your animal.");
 
                         //ask for a name for the chosen animal
                         System.out.println("\nIt's time to give your animal a name!");
@@ -338,7 +411,7 @@ public class VirtualPet {
                 menuChoice = kb.next();
 
                 //check if the user wants to exit the program
-                checkExit(menuChoice);
+                checkExit(menuChoice, fileName, trackHistory, username, pw, animalChoice, MAX_STATS, currentStats, money);
                 
                 switch (menuChoice){
                     case "Play", "Interact", "1":
@@ -367,18 +440,22 @@ public class VirtualPet {
                             //read in user's choice
                             System.out.print("Enter your choice: ");
                             petInteractionChoice = kb.nextInt();
+                            //perform interactions with the pet based on user's choice
                             switch(petInteractionChoice){
                                 case 1: 
-                                    playWithPet(currentEnergy, petName);
+                                    playWithPet(currentStats[1], petName);
                                     money -= 5;
+                                    trackHistory[1] += 1;
                                     break;
                                 case 2:
-                                    feedPet(currentFood, petName);
+                                    feedPet(currentStats[2], petName);
                                     money -= 5;
+                                    trackHistory[2] += 1;
                                     break;
                                 case 3:
-                                    groomPet(currentHealth, petName);
+                                    groomPet(currentStats[0], petName);
                                     money -= 5;
+                                    trackHistory[0] += 1;
                                     break;
                                 default:
                                     System.out.println("Invalid Input");
