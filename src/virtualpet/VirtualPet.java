@@ -23,18 +23,6 @@ public class VirtualPet {
         System.out.println("Doggie Heaven\n");
     }
     
-    public static boolean allowAccess(String username, String password){
-        final String CORRECT_USERNAME = "snoopy";
-        final String CORRECT_PW = "toto";
-        boolean accessAllowed = false;
-        //determine the input matches correct username and password
-        if (username.equals(CORRECT_USERNAME) && password.equals(CORRECT_PW)){
-            //exit the loop if the username and password are correct
-           accessAllowed = true;
-        }//end if
-        return accessAllowed;
-    }
-    
     public static void displayMenu(String petName){
         if (petName.equals("")){
             //display the menu
@@ -52,7 +40,7 @@ public class VirtualPet {
         }
     }
     
-    public static void checkExit(String menuChoice, String fileName, int[] trackHistory, String userName, String pw, String animalChoice, int[] maxStats, int[] currentStats, int money){
+    public static void checkExit(String menuChoice, String fileName, int[] trackHistory, String userName, String pw, String animalChoice, String petName, int[] maxStats, int[] currentStats, int money){
         //exit the program if the third menu option is chosen
         if (menuChoice.equals("3") || menuChoice.equals("Exit")){
             try{
@@ -60,7 +48,8 @@ public class VirtualPet {
                 printW.println(userName);
                 printW.println(pw);
                 printW.println(animalChoice);
-                for (int i=0; i<3; i++){
+                printW.println(petName);
+                for (int i=0; i<maxStats.length; i++){
                     printW.println(maxStats[i]);
                     printW.println(currentStats[i]);
                 }
@@ -252,8 +241,6 @@ public class VirtualPet {
         
         //CONSTANTS
         final int NAME_LENGTH = r.nextInt(5)+4;
-        //health, energy, food
-        final int[] MAX_STATS = {r.nextInt(50, 100),r.nextInt(50, 100),r.nextInt(50, 100)};
         final String VOWELS = "aeiou";
         final String CONSONANTS = "bcdfghjklmnpqrstvwxyz";
         
@@ -266,6 +253,8 @@ public class VirtualPet {
         boolean firstTime = true;
         String petName = "";
         int money = 50;
+        //health, energy, food
+        int[] maxStats = {r.nextInt(50, 100),r.nextInt(50, 100),r.nextInt(50, 100)};
         int[] currentStats = {10, 10, 10};
         int[] trackHistory = {0, 0, 0};
         String petInteraction = "";
@@ -292,12 +281,17 @@ public class VirtualPet {
             Scanner s = null;
             if(userInfo.exists()){
                 try{
+                    //load from the file
                     s = new Scanner(userInfo);
                     s.nextLine();
                     correctPw = s.nextLine();
-                    petName = s.nextLine();
                     animalChoice = s.nextLine();
-                    //load from the file
+                    petName = s.nextLine();
+                    for (int i=0; i<maxStats.length; i++){
+                        maxStats[i] = s.nextInt();
+                        currentStats[i] = s.nextInt();
+                    }
+                    money = s.nextInt();
                 }catch(FileNotFoundException e){
                     System.out.println("File not found");
                 }
@@ -320,29 +314,7 @@ public class VirtualPet {
             else{
                 System.out.print("create your password: ");
                 pw = kb.nextLine();
-                petName = "";
             }
-            
-            
-
-
-            //determine if access to the program is allowed
-//            allowAccess = allowAccess(username, pw);
-            
-//            //enter the program if access is permitted
-//            if (allowAccess){
-//                break;
-//            }
-//            else{
-//                //output a message to notify the user
-//                System.out.println("You input the wrong username or password.");
-//                
-//                //exit the program if the user failed to input the right username and password after three times
-//                if (i==2){
-//                    System.exit(0);
-//                }
-//            }
-//        }
         
         //loop the program infinitely
         while(true){
@@ -355,7 +327,7 @@ public class VirtualPet {
                 menuChoice = kb.next();
 
                 //check if the user wants to exit the program
-                checkExit(menuChoice, fileName, trackHistory, username, pw, animalChoice, MAX_STATS, currentStats, money);
+                checkExit(menuChoice, fileName, trackHistory, username, pw, animalChoice, petName, maxStats, currentStats, money);
                 
                 switch(menuChoice){
                     case "Start", "1":
@@ -411,7 +383,7 @@ public class VirtualPet {
                 menuChoice = kb.next();
 
                 //check if the user wants to exit the program
-                checkExit(menuChoice, fileName, trackHistory, username, pw, animalChoice, MAX_STATS, currentStats, money);
+                checkExit(menuChoice, fileName, trackHistory, username, pw, animalChoice, petName, maxStats, currentStats, money);
                 
                 switch (menuChoice){
                     case "Play", "Interact", "1":
@@ -431,6 +403,7 @@ public class VirtualPet {
                         System.out.println("Do you want to interact with your pet? (y/n) ");
                         petInteraction = kb.next();
                         if (petInteraction.equals("y")){
+                            money -= 5;
                             //out put pet interaction options
                             System.out.println("**PET INTERACTION**");
                             System.out.println("1: play with your pet");
@@ -443,18 +416,15 @@ public class VirtualPet {
                             //perform interactions with the pet based on user's choice
                             switch(petInteractionChoice){
                                 case 1: 
-                                    playWithPet(currentStats[1], petName);
-                                    money -= 5;
+                                    currentStats[1] = playWithPet(currentStats[1], petName);
                                     trackHistory[1] += 1;
                                     break;
                                 case 2:
-                                    feedPet(currentStats[2], petName);
-                                    money -= 5;
+                                    currentStats[2] = feedPet(currentStats[2], petName);
                                     trackHistory[2] += 1;
                                     break;
                                 case 3:
-                                    groomPet(currentStats[0], petName);
-                                    money -= 5;
+                                    currentStats[0] = groomPet(currentStats[0], petName);
                                     trackHistory[0] += 1;
                                     break;
                                 default:
